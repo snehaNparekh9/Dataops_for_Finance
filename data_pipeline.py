@@ -32,4 +32,19 @@ clean_data_task = PythonOperator(
 )
 
 validate_data_task = PythonOperator(
-    task
+    task_id='validate_data',
+    python_callable=validate_data,
+    op_args=['data/cleaned_data.csv'],
+    dag=dag
+)
+
+upload_to_database_task = PythonOperator(
+    task_id='upload_to_database',
+    python_callable=upload_to_database,
+    op_args=['data/cleaned_data.csv', 'postgresql://user:password@localhost/mydatabase', 'finance_data'],
+    dag=dag
+)
+
+# Define task dependencies
+fetch_data_task >> clean_data_task >> validate_data_task >> upload_to_database_task
+    
